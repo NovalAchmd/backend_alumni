@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Alumni;
 use Illuminate\Support\Facades\Validator;
@@ -19,7 +20,11 @@ class AlumniController extends Controller
      */
     public function Alumni()
     {
-        $alumni = Alumni::select('nama_alumni', 'nim', 'angkatan', 'tanggal_lahir', 'alamat', 'email','foto', 'status',);
+        // $alumni = Alumni::select('nama_alumni', 'nim', 'angkatan', 'tanggal_lahir', 'alamat', 'email','foto', 'status');
+        $alumni = Alumni::all();
+        foreach ($alumni as $al) {
+            $al->Alumni;
+        }
         return response()->json(['data' => $alumni], 200);
     }
 
@@ -30,41 +35,48 @@ class AlumniController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function CreateAlumni(Request $request)
-{   
-    $validator = Validator::make($request->all(), [
-        'nama_alumni' => 'required|string|max:255',
-        'nim' => 'required|string|max:10|unique:alumni',
-        'angkatan' => 'required|string',
-        'tanggal_lahir' => 'nullable|date',
-        'alamat' => 'nullable|string',
-        'no_tlp' => 'required|string',
-        'email' => 'required|email|unique:alumni',
-        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
+    {   
+        try{
+            $validator = Validator::make($request->all(), [
+                // 'user_id' => 'required|exists:users,id',
+                'nama_alumni' => 'required|string|max:255',
+                'nim' => 'required|string|max:10',
+                'angkatan' => 'required|string',
+                'tanggal_lahir' => 'required|date',
+                'alamat' => 'required|string',
+                'no_tlp' => 'required|string',
+                'email' => 'required|email|unique:alumni',
+                'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'status' => 'required|in:aktif,pasif',
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+    
+            $fotoPath = $request->file('foto')->store('alumni_photos', 'public');
+    
+            $alumni = Alumni::create([
+                // 'user_id' => $request->user_id,
+                'nama_alumni' => $request->nama_alumni,
+                'angkatan' => $request->angkatan,
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'alamat' => $request->alamat,
+                'no_tlp' => $request->no_tlp,
+                'email' => $request->email,
+                'foto' => $fotoPath,
+                'status' => $request->status,
+            ]);
+    
+            return response()->json(['data' => $alumni, 'message' => 'Alumni created successfully'], 201);
+        }catch(\Exception $e) {
+            Log::error('Error retrieving report: ' . $e->getMessage());
 
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'message' => 'Tidak berhasil membuat alumni',
+            ], 500);
+        }
     }
-
-    $alumniData = $request->only([
-        'user_id', 'nama_alumni', 'nim', 'angkatan', 'tanggal_lahir',
-        'alamat', 'no_tlp', 'email', 'status'
-    ]);
-
-    // Set default values for nullable fields
-    $alumniData['tanggal_lahir'] = $request->tanggal_lahir ?? null;
-    $alumniData['alamat'] = $request->alamat ?? null;
-    $alumniData['status'] = $request->status ?? 'aktif';
-
-    if ($request->hasFile('foto')) {
-        $fotoPath = $request->file('foto')->store('alumni_photos', 'public');
-        $alumniData['foto'] = $fotoPath;
-    }
-
-    $alumni = Alumni::create($alumniData);
-
-    return response()->json(['data' => $alumni, 'message' => 'Alumni created successfully'], 201);
-}
 
     /**
      * Display the specified resource.
@@ -78,7 +90,7 @@ class AlumniController extends Controller
         if (!$alumni) {
             return response()->json(['message' => 'Alumni not found'], 404);
         }
-        return response()->json(['data' => 'nama_alumni', 'nim', 'angkatan', 'tanggal_lahir', 'alamat', 'email','foto', 'status'], 200);
+        return response()->json(['data' => $alumni], 200);
     }
 
     /**
@@ -90,67 +102,68 @@ class AlumniController extends Controller
      */
     public function UpdateAlumni(Request $request)
 {
-    // Mendapatkan user yang sedang login
     $user = auth()->user();
-    
-    // Memastikan bahwa user yang login memiliki data alumni
-    $alumni = $user->alumni; // ini sudah benar jika relasi alumni sudah benar
+    $alumni = $user->alumni;
+
     if (!$alumni) {
         return response()->json(['message' => 'Alumni data not found for this user'], 404);
     }
 
-    // Validasi data (semua field adalah opsional)
-    $validator = Validator::make($request->all(), [
-        'name' => 'nullable|string|max:255',
-        'angkatan' => 'nullable|string',
-        'no_hp' => 'nullable|string',
-        'email' => 'nullable|email|unique:alumni,email,' . $alumni->id_alumni . ',id_alumni',
-        'tanggal_lahir' => 'nullable|date', // Validasi untuk tanggal lahir
-        'alamat' => 'nullable|string|max:255', // Validasi untuk alamat
-        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048' // Validasi untuk foto (optional)
-    ]);
+    try {
+        // Validate input data
+        $validator = Validator::make($request->all(), [
+            'nama_alumni' => 'nullable|string|max:255',
+            'angkatan' => 'nullable|string',
+            'no_tlp' => 'nullable|string',
+            'email' => 'nullable|email|unique:alumni,email,' . $alumni->id_alumni . ',id_alumni',
+            'alamat' => 'nullable|string',
+            'tanggal_lahir' => 'nullable|date',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
-    }
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
-    // Siapkan data untuk update
-    $updateData = [];
+        // Prepare data for update
+        $dataToUpdate = [
+            'nama_alumni' => $request->nama_alumni ?? $alumni->nama_alumni,
+            'angkatan' => $request->angkatan ?? $alumni->angkatan,
+            'no_tlp' => $request->no_tlp ?? $alumni->no_tlp,
+            'email' => $request->email ?? $alumni->email,
+            'alamat' => $request->alamat ?? $alumni->alamat,
+            'tanggal_lahir' => $request->tanggal_lahir ?? $alumni->tanggal_lahir,
+            
+        ];
 
-    // Hanya tambahkan field yang disertakan dalam permintaan
-    if ($request->has('name')) {
-        $updateData['nama_alumni'] = $request->name;
-    }
-    if ($request->has('angkatan')) {
-        $updateData['angkatan'] = $request->angkatan;
-    }
-    if ($request->has('no_hp')) {
-        $updateData['no_tlp'] = $request->no_hp;
-    }
-    if ($request->has('email')) {
-        $updateData['email'] = $request->email;
-    }
-    if ($request->has('tanggal_lahir')) {
-        $updateData['tanggal_lahir'] = $request->tanggal_lahir;
-    }
-    if ($request->has('alamat')) {
-        $updateData['alamat'] = $request->alamat;
-    }
-    if ($request->hasFile('foto')) {
-        // Simpan foto dan tambahkan path ke updateData
-        $updateData['foto'] = $request->file('foto')->store('uploads/foto', 'public');
-    }
+        // Handle photo upload if provided
+        if ($request->hasFile('foto')) {
+            // Delete the old photo if it exists
+            if ($alumni->foto) {
+                Storage::disk('public')->delete($alumni->foto);
+            }
+            // Save the new photo and update its path
+            $dataToUpdate['foto'] = $request->file('foto')->store('alumni_photos', 'public');
+        } else {
+            // If no new photo is provided, retain the old photo
+            $dataToUpdate['foto'] = $alumni->foto;
+        }
 
-    // Perbarui data alumni dengan data yang ada di $updateData
-    $alumni->update($updateData); // ini seharusnya tidak bermasalah
+        // Update the alumni data
+        $alumni->update($dataToUpdate);
 
-    return response()->json([
-        'data' => $alumni,
-        'message' => 'Alumni updated successfully'
-    ], 200);
+        return response()->json([
+            'data' => $alumni,
+            'message' => 'Alumni updated successfully'
+        ], 200);
+    } catch (\Exception $e) {
+        Log::error('Error updating alumni: ' . $e->getMessage());
+
+        return response()->json([
+            'message' => 'Tidak berhasil memperbarui alumni',
+        ], 500);
+    }
 }
-
-
 
     /**
      * Remove the specified resource from storage.
@@ -158,19 +171,48 @@ class AlumniController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function DeleteAlumni($id)
-    {
-        $alumni = Alumni::find($id);
-        if (!$alumni) {
-            return response()->json(['message' => 'Alumni not found'], 404);
-        }
+    public function DeleteAlumni(Request $request, $id)
+{
+    $alumni = Alumni::find($id);
 
-        // Delete photo file
+    if (!$alumni) {
+        return response()->json(['message' => 'Alumni tidak ditemukan'], 404);
+    }
+
+    // Tentukan data apa saja yang boleh dihapus berdasarkan input dari request
+    $dataToUpdate = [];
+
+    if ($request->has('hapus_foto')) {
+        $dataToUpdate['foto'] = null;
+        // Hapus foto di storage jika ada
         if ($alumni->foto) {
             Storage::disk('public')->delete($alumni->foto);
         }
-
-        $alumni->delete();
-        return response()->json(['message' => 'Alumni deleted successfully'], 200);
     }
+
+    if ($request->has('hapus_tanggal_lahir')) {
+        $dataToUpdate['tanggal_lahir'] = null;
+    }
+
+    if ($request->has('hapus_alamat')) {
+        $dataToUpdate['alamat'] = null;
+    }
+
+    if ($request->has('hapus_no_tlp')) {
+        $dataToUpdate['no_tlp'] = null;
+    }
+
+    if ($request->has('hapus_email')) {
+        $dataToUpdate['email'] = null;
+    }
+
+    // Update data tanpa menyentuh nim, id_user, id_alumni, dan status
+    $alumni->update($dataToUpdate);
+
+    return response()->json([
+        'message' => 'Data alumni berhasil dihapus berdasarkan permintaan',
+        'data' => $alumni
+    ], 200);
+}
+
 }

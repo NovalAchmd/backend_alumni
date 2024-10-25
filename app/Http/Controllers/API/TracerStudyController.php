@@ -17,11 +17,11 @@ class TracerStudyController extends Controller
     }
 
     // Create a new Tracer_study record
-    public function CreateTracerStudy(Request $request)
+    public function createPertanyaan(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'id_pertanyaan' => 'required|exists:pertanyaan,id_pertanyaan', // Validasi untuk memastikan bahwa Pertanyaan terkait ada
-            'jawaban' => 'required|string', // Gantilah 'jawaban' dengan field yang sesuai jika berbeda
+            'pertanyaan' => 'required|exists:pertanyaan,pertanyaan', // Gantilah 'jawaban' dengan field yang sesuai jika berbeda
         ]);
 
         if ($validator->fails()) {

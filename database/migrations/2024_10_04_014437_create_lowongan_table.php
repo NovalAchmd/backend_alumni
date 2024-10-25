@@ -13,19 +13,19 @@ return new class extends Migration
     {
         Schema::create('lowongan', function (Blueprint $table) {
             $table->unsignedBigInteger('id_lowongan')->autoIncrement();
-            $table->unsignedBigInteger('id_perusahaan');
+            $table->unsignedBigInteger('nib')->unique();
             $table->string('judul_lowongan');
             $table->string('posisi_pekerjaan');
             $table->string('deskripsi_pekerjaan');
-            $table->enum('tipe_pekerjaan', ['Full_time', 'Part_time', "internship"]);
-            $table->enum('sistem_kerja', ['WFH', 'WFO']);
+            $table->string("gambar");
+            $table->enum('tipe_pekerjaan', ['Full_time', 'Part_time', "Contract"]);
             $table->string('jumlah_kandidat');
             $table->string('lokasi');
-            $table->date('tanggal_aktif');
             $table->string('rentang_gaji');
             $table->string('pengalaman_kerja');
             $table->string('kontak');
-            $table->foreign('id_perusahaan')->references('id_perusahaan')->on('perusahaan');
+            $table->enum("status", ['terima', 'tolak', 'pending']);
+            $table->date('tanggal_aktif');
             $table->timestamps();
         });
     }

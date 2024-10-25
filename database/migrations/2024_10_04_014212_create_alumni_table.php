@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('alumni', function (Blueprint $table) {
             $table->unsignedBigInteger('id_alumni')->autoIncrement();
-            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->string('nama_alumni');
             $table->string('nim')->unique();
             $table->string('angkatan');
             $table->date('tanggal_lahir')->nullable();
             $table->string('alamat')->nullable();
-            $table->string('no_tlp');
+            $table->string('no_tlp')->nullable();
             $table->string('email')->unique();
             $table->string('foto')->nullable();
             $table->enum('status', ['aktif', 'pasif'])->default('pasif');

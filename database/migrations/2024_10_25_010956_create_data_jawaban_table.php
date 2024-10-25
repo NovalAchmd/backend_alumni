@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admins', function (Blueprint $table) {
-            $table->unsignedBigInteger('id_admin')->autoIncrement();
-            $table->foreignId('id_user')->references('id')->on('users')->onDelete('cascade');
-            $table->string('nama');
-            $table->string('noomor_induk')->unique();
-            $table->string('no_hp');
+        Schema::create('data_jawaban', function (Blueprint $table) {
+            $table->unsignedBigInteger("id_jawaban");
+            $table->unsignedBigInteger("id_user")->unique();
+            $table->unsignedBigInteger('id_pertanyaan')->unique();
+            $table->string('jawaban_tertutup');
+            $table->string('jawaban_skala');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tb_admin');
+        Schema::dropIfExists('data_jawaban');
     }
 };

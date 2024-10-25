@@ -13,20 +13,20 @@ return new class extends Migration
     {
         Schema::create('perusahaan', function (Blueprint $table) {
             $table->unsignedBigInteger('id_perusahaan')->autoIncrement();
-            $table->unsignedBigInteger("user_id")->unique();
+            $table->unsignedBigInteger("id_user")->unique();
             $table->string('nama_perusahaan');
             $table->string('nib');
-            $table->string('alamat');
-            $table->string('email_perusahaan');
+            $table->string('alamat')->nullable();
+            $table->string('email')->unique();
             $table->string('sektor_bisnis');
-            $table->string('deskripsi_perusahaan');
-            $table->string('no_tlp');
-            $table->string('email');
-            $table->string('foto');
+            $table->string('deskripsi_perusahaan')->nullable();
+            $table->string('jumlah_karyawan')->nullable();
+            $table->string('no_tlp')->nullable();
+            $table->string('foto')->nullable();
             $table->string('website_perusahaan');
             $table->enum('status', ['mengunggu', 'diterima', 'ditolak']);
             $table->timestamps();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

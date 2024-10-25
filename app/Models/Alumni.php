@@ -12,11 +12,12 @@ class Alumni extends Model
     protected $primaryKey = 'id_alumni';
 
     protected $fillable = [
-        'user_id','nim', 'nama_alumni', 'angkatan', 'no_tlp', 'email'
+        'id_user','nim', 'nama_alumni', 'angkatan', 'no_tlp', 'email', 'alamat', 'tanggal_lahir', 'foto'
     ];
+    protected $guarded = [];
 
-    public function Alumni()
+    public function user()
     {
-        return $this->belongsTo(Alumni::class);
+        return $this->belongsTo(Alumni::class, 'id_user','id');
     }
 }

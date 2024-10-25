@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('tracer_study', function (Blueprint $table) {
             $table->unsignedBigInteger('id_tracer_study')->autoIncrement();
             $table->unsignedBigInteger('id_pertanyaan')->unique();
+            $table->unsignedBigInteger('id_alumni')->unique();
             $table->text('jawaban');
             $table->timestamps();
             // $table->foreign('id_pertanyaan')->references('id_pertanyaan')->on('pertanyaan');
+            $table->foreign('id_alumni')->references('id_alumni')->on('alumni')->onDelete('cascade');
         });
     }
 

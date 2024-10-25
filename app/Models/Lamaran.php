@@ -11,4 +11,8 @@ class Lamaran extends Model
 
     protected $table = 'lamaran';
     protected $guarded = [];
+    protected $primaryKey = 'id_lamaran';
+
+    protected $fillable = ['id_lamaran', 'id_alumni', 'id_lowongan', 'nama_pelamar', 'email', 'CV', 'transkrip_nilai', 'sertifikat',
+    'portopolio', 'status'];
 }

@@ -11,4 +11,8 @@ class Lowongan extends Model
 
     protected $table = 'lowongan';
     protected $guarded = [];
+    
+    protected $primaryKey = 'id_lowongan';
+
+    
 }

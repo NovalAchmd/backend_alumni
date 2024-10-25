@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('pertanyaan', function (Blueprint $table) {
             $table->unsignedBigInteger('id_pertanyaan')->autoIncrement();
-            $table->unsignedBigInteger('id_alumni');
             $table->text('pertanyaan');
+            $table->enum('jenis', ['tertutup', 'skala']);
             $table->timestamps();
-            $table->foreign('id_alumni')->references('id_alumni')->on('alumni');
         });
     }
 

@@ -27,6 +27,7 @@ class RegisterController extends Controller
             'nomor_induk' => 'required|string',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8|confirmed',
+            'no_tlp' => 'required|string|min:12'
         ]);
 
         // Check if validation fails
@@ -47,7 +48,7 @@ class RegisterController extends Controller
                 'password'  => bcrypt($request->password)
             ]);
             $admin = Admin::create([
-                'user_id' => $user->id,
+                'id_user' => $user->id,
                 'nama' => $request->name,
                 'no_induk' => $request->nomor_induk,
                 'no_hp' => $request->no_hp,
@@ -62,33 +63,37 @@ class RegisterController extends Controller
                 'email'      => $request->email
             ]);
             $alumni = Alumni::create([
-                'user_id' => $user->id,
+                'id_user' => $user->id,
                 'nim' => $request->nomor_induk, // Use nomor_induk as nim
                 'nama_alumni' => $request->name,
                 'angkatan' => $request->angkatan ?? null, // Add angkatan if available
-                'no_tlp' => $request->no_hp,
+                'no_tlp' => $request->no_tlp,
                 'email' => $request->email ?? null, // Add email if available
             ]);
             return response()->json(['status' => 201, 'success' => true, 'user' => $user, 'alumni' => $alumni], 201);
-        } elseif ($request->role == '2') { // Perusahaan
+        } elseif ($request->role == '2') { // Perusahaan           
             $user = User::create([
                 'role' => $request->role,
                 'name'      => $request->name,
                 'nomor_induk'     => $request->nomor_induk,
-                'password'  => bcrypt($request->password)
+                'password'  => bcrypt($request->password),
+                'email'      => $request->email
             ]);
             $perusahaan = Perusahaan::create([
-                'user_id' => $user->id,
-                'nib' => $request->nomor_induk, // Use nomor_induk as NIB
+                'id_user' => $user->id,
+                'nib' => $request->nomor_induk, // Gunakan nomor_induk sebagai NIB
                 'nama_perusahaan' => $request->name,
                 'sektor_bisnis' => $request->sektor_bisnis,
-                'alamat' => $request->alamat,
-                'email_perusahaan' => $request->email,
-                'website_perusahaan' => $request->website_perusahaan,
-                'foto' => $request->foto ?? null, // Add foto if available
-                'no_tlp' => $request->no_hp,
-                'status' => 'mengunggu', // Set default status
+                'alamat' => $request->alamat ?? null,
+                'email' => $request->email ?? null, // Pastikan ini benar
+                'website_perusahaan' => $request->website_perusahaan ?? null,
+                'deskripsi_perusahaan' => $request->deskripsi_perusahaan ?? null,
+                'jumlah_karyawan' => $request->jumlah_karyawan ?? null,
+                'foto' => $request->foto ?? null, // Tambahkan foto jika ada
+                'no_tlp' => $request->no_tlp ?? null, // Pastikan ini benar
+                'status' => 'mengunggu', // Setel status default
             ]);
+            
             return response()->json(['status' => 201, 'success' => true, 'user' => $user, 'perusahaan' => $perusahaan], 201);
         }
 

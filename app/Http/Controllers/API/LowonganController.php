@@ -11,80 +11,92 @@ class LowonganController extends Controller
 {
     public function Lowongan()
     {
-        $lowongan = Lowongan::with('perusahaan:id_perusahaan,nama_perusahaan')
-                            ->get();
+        $lowongan = Lowongan::all();
+        foreach ($lowongan as $al) {
+            $al->lowongan;
+        }
         return response()->json(['data' => $lowongan], 200);
     }
 
     public function CreateLowongan(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'id_perusahaan' => 'required|exists:perusahaan,id_perusahaan',
-            'judul_lowongan' => 'required|string',
-            'posisi_pekerjaan' => 'required|string',
-            'deskripsi_pekerjaan' => 'required|string',
-            'tipe_pekerjaan' => 'required|in:Full_time,Part_time,internship',
-            'sistem_kerja' => 'required|in:WFH,WFO',
-            'jumlah_kandidat' => 'required|string',
-            'lokasi' => 'required|string',
-            'tanggal_aktif' => 'required|date',
-            'rentang_gaji' => 'required|string',
-            'pengalaman_kerja' => 'required|string',
-            'kontak' => 'required|string',
-        ]);
+{
+    // Cek apakah pengguna sudah login
+    $user = auth()->user();
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $lowongan = Lowongan::create($request->all());
-
-        return response()->json(['message' => 'Lowongan created successfully', 'data' => $lowongan], 201);
+    // Pastikan pengguna yang membuat lowongan adalah perusahaan
+    if (!$user || $user->role !== 2) { // Misalnya role perusahaan bernilai 2
+        return response()->json(['message' => 'Hanya perusahaan yang dapat membuat lowongan'], 403);
     }
 
-    public function MelihatLowongan($id_lowongan)
-    {
-        $lowongan = Lowongan::with('perusahaan:id_perusahaan,nama_perusahaan')
-                            ->find($id_lowongan);
-        
-        if (!$lowongan) {
-            return response()->json(['message' => 'Lowongan not found'], 404);
-        }
+    // Validasi input
+    $validator = Validator::make($request->all(), [
+        'nib' => 'required|exists:perusahaan,nib',
+        'judul_lowongan' => 'required|string',
+        'posisi_pekerjaan' => 'required|string',
+        'deskripsi_pekerjaan' => 'required|string',
+        'gambar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'tipe_pekerjaan' => 'required|in:Full_time,Part_time,internship',
+        'jumlah_kandidat' => 'required|string',
+        'lokasi' => 'required|string',
+        'tanggal_aktif' => 'required|date',
+        'rentang_gaji' => 'required|string',
+        'pengalaman_kerja' => 'required|string',
+        'kontak' => 'required|string',
+    ]);
 
-        return response()->json(['data' => $lowongan], 200);
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);
     }
 
-    public function UpdateLowongan(Request $request, $id_lowongan)
-    {
-        $validator = Validator::make($request->all(), [
-            'id_perusahaan' => 'exists:perusahaan,id_perusahaan',
-            'judul_lowongan' => 'string',
-            'posisi_pekerjaan' => 'string',
-            'deskripsi_pekerjaan' => 'string',
-            'tipe_pekerjaan' => 'in:Full_time,Part_time,internship',
-            'sistem_kerja' => 'in:WFH,WFO',
-            'jumlah_kandidat' => 'string',
-            'lokasi' => 'string',
-            'tanggal_aktif' => 'date',
-            'rentang_gaji' => 'string',
-            'pengalaman_kerja' => 'string',
-            'kontak' => 'string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $lowongan = Lowongan::find($id_lowongan);
-
-        if (!$lowongan) {
-            return response()->json(['message' => 'Lowongan not found'], 404);
-        }
-
-        $lowongan->update($request->all());
-
-        return response()->json(['message' => 'Lowongan updated successfully', 'data' => $lowongan], 200);
+    // Proses upload gambar
+    $lowonganData = $request->all();
+    if ($request->hasFile('gambar')) {
+        $imagePath = $request->file('gambar')->store('lowongan_photos', 'public');
+        $lowonganData['gambar'] = $imagePath;
     }
+
+    // Tambahkan status pending secara default
+    $lowonganData['status'] = 'pending';
+
+    // Simpan data lowongan ke database
+    $lowongan = Lowongan::create($lowonganData);
+
+    return response()->json(['message' => 'Lowongan created successfully', 'data' => $lowongan], 201);
+}
+
+
+
+    // public function UpdateLowongan(Request $request, $id_lowongan)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'id_perusahaan' => 'exists:perusahaan,id_perusahaan',
+    //         'judul_lowongan' => 'string',
+    //         'posisi_pekerjaan' => 'string',
+    //         'deskripsi_pekerjaan' => 'string',
+    //         'tipe_pekerjaan' => 'in:Full_time,Part_time,internship',
+    //         'sistem_kerja' => 'in:WFH,WFO',
+    //         'jumlah_kandidat' => 'string',
+    //         'lokasi' => 'string',
+    //         'tanggal_aktif' => 'date',
+    //         'rentang_gaji' => 'string',
+    //         'pengalaman_kerja' => 'string',
+    //         'kontak' => 'string',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json(['errors' => $validator->errors()], 422);
+    //     }
+
+    //     $lowongan = Lowongan::find($id_lowongan);
+
+    //     if (!$lowongan) {
+    //         return response()->json(['message' => 'Lowongan not found'], 404);
+    //     }
+
+    //     $lowongan->update($request->all());
+
+    //     return response()->json(['message' => 'Lowongan updated successfully', 'data' => $lowongan], 200);
+    // }
 
     public function DeleteLowongan($id_lowongan)
     {

@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Admin extends Model
+class Data_jawaban extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $table = 'data_jawaban';
 
-    protected $table = 'admins';
+    protected $primaryKey = '';
 
-    protected $primaryKey = 'id_admin';
+
 }

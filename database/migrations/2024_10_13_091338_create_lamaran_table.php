@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_alumni');
             $table->unsignedBigInteger('id_lowongan');
             $table->string('nama_pelamar');
+            $table->string('email');
             $table->string('CV');
             $table->string('transkrip_nilai');
             $table->string('sertifikat');

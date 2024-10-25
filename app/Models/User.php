@@ -23,8 +23,9 @@ class User extends Authenticatable
 
     public function alumni()
 {
-    return $this->hasOne(Alumni::class);
+    return $this->hasOne(Alumni::class, 'id_user', 'id'); // Match the foreign key in alumni and local key in users
 }
+
 
     /**
      * The attributes that should be hidden for serialization.
