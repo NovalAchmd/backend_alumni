@@ -60,7 +60,7 @@ Route::get('/melihat-lowongan/{id_lowongan}', [LowonganController::class, 'Melih
 
 // Lamaran
 Route::get('/lamaran', [LamaranController::class, 'Lamaran']);
-Route::post('/create-lamaran', [LamaranController::class, 'CreateLamaran']);
+Route::middleware('auth:sanctum')->post('/create/lamaran/{idLowongan}', [LamaranController::class, 'CreateLamaran']);
 Route::put('/update-lamaran/{id_lamaran}', [LamaranController::class, 'UpdateLamaran']);
 Route::delete('/delete-lamaran/{id_lamaran}', [LamaranController::class, 'DeleteLamaran']);
 Route::get('/melihat-lamaran/{id_lamaran}', [LamaranController::class, 'MelihatLamaran']);
