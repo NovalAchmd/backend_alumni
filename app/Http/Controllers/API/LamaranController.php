@@ -34,7 +34,7 @@ class LamaranController extends Controller
         }
 
         $lamaranData = $request->all();
-        $lamaranData['status'] = 'pending'; // Set initial status to pending
+        $lamaranData['status'] = 'pending'; 
 
         $lamaran = Lamaran::create($lamaranData);
 

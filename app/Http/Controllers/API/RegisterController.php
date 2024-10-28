@@ -35,32 +35,37 @@ class RegisterController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
+        // Check if nomor_induk starts with 32022 or higher for Alumni role
+        if ($request->role == 1 && substr($request->nomor_induk, 0, 5) >= '32022') {
+            return response()->json([
+                'status' => 403,
+                'success' => false,
+                'message' => 'Nomor Induk 32022 ke atas tidak diizinkan untuk registrasi sebagai Alumni.'
+            ], 403);
+        }
+
         // Create specific models based on user role
         if ($request->role == '0') { // Admin
-            response()->json([
-                'status' => '409',
-                'success' => false,
-            ], 409);
             $user = User::create([
                 'role' => $request->role,
-                'name'      => $request->name,
-                'nomor_induk'     => $request->nomor_induk,
-                'password'  => bcrypt($request->password)
+                'name' => $request->name,
+                'nomor_induk' => $request->nomor_induk,
+                'password' => bcrypt($request->password)
             ]);
             $admin = Admin::create([
                 'id_user' => $user->id,
                 'nama' => $request->name,
                 'no_induk' => $request->nomor_induk,
-                'no_hp' => $request->no_hp,
+                'no_hp' => $request->no_tlp,
             ]);
             return response()->json(['status' => 201, 'success' => true, 'user' => $user, 'admin' => $admin], 201);
         } elseif ($request->role == '1') { // Mahasiswa (Alumni)
             $user = User::create([
-                'role'       => $request->role,
-                'name'       => $request->name,
-                'nomor_induk'=> $request->nomor_induk,
-                'password'   => bcrypt($request->password),
-                'email'      => $request->email
+                'role' => $request->role,
+                'name' => $request->name,
+                'nomor_induk' => $request->nomor_induk,
+                'password' => bcrypt($request->password),
+                'email' => $request->email
             ]);
             $alumni = Alumni::create([
                 'id_user' => $user->id,
@@ -71,27 +76,27 @@ class RegisterController extends Controller
                 'email' => $request->email ?? null, // Add email if available
             ]);
             return response()->json(['status' => 201, 'success' => true, 'user' => $user, 'alumni' => $alumni], 201);
-        } elseif ($request->role == '2') { // Perusahaan           
+        } elseif ($request->role == '2') { // Perusahaan
             $user = User::create([
                 'role' => $request->role,
-                'name'      => $request->name,
-                'nomor_induk'     => $request->nomor_induk,
-                'password'  => bcrypt($request->password),
-                'email'      => $request->email
+                'name' => $request->name,
+                'nomor_induk' => $request->nomor_induk,
+                'password' => bcrypt($request->password),
+                'email' => $request->email
             ]);
             $perusahaan = Perusahaan::create([
                 'id_user' => $user->id,
-                'nib' => $request->nomor_induk, // Gunakan nomor_induk sebagai NIB
+                'nib' => $request->nomor_induk,
                 'nama_perusahaan' => $request->name,
                 'sektor_bisnis' => $request->sektor_bisnis,
                 'alamat' => $request->alamat ?? null,
-                'email' => $request->email ?? null, // Pastikan ini benar
+                'email' => $request->email ?? null,
                 'website_perusahaan' => $request->website_perusahaan ?? null,
                 'deskripsi_perusahaan' => $request->deskripsi_perusahaan ?? null,
                 'jumlah_karyawan' => $request->jumlah_karyawan ?? null,
-                'foto' => $request->foto ?? null, // Tambahkan foto jika ada
-                'no_tlp' => $request->no_tlp ?? null, // Pastikan ini benar
-                'status' => 'mengunggu', // Setel status default
+                'foto' => $request->foto ?? null,
+                'no_tlp' => $request->no_tlp ?? null,
+                'status' => 'mengunggu',
             ]);
             
             return response()->json(['status' => 201, 'success' => true, 'user' => $user, 'perusahaan' => $perusahaan], 201);

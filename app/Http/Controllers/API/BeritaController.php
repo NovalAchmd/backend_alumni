@@ -36,12 +36,10 @@ class BeritaController extends Controller
         ], 422);
     }
 
-    // Handle image upload with hashed name
     $image = $request->file('gambar');
     $hashedImageName = $image->hashName();
     $image->store('public/berita_photos');
 
-    // Create the berita entry with the hashed image name
     $berita = Berita::create([
         'judul_berita' => $request->judul_berita,
         'tanggal_terbit' => $request->tanggal_terbit,

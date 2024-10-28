@@ -20,10 +20,10 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         try {
-            // Validate incoming request data
+            
             $validator = Validator::make($request->all(), [
                 'nomor_induk' => 'required|string',
-                'password' => 'required|string|min:8', // Ensure minimum password length
+                'password' => 'required|string|min:8', 
             ]);
 
             // Return validation errors if validation fails
@@ -50,10 +50,9 @@ class LoginController extends Controller
                 ], 401);
             }
 
-            // Create a Sanctum token for the authenticated user
+            
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            // Return successful response with user data and token
             return response()->json([
                 'message' => 'Login anda Berhasil',
                 'status' => 200,
@@ -61,14 +60,14 @@ class LoginController extends Controller
                 'token' => $token,
             ], 200);
         } catch (\Throwable $t) {
-            // Log error details for debugging
+
             Log::error('Error during login: ' . $t->getMessage(), [
                 'exception' => $t,
                 'request' => $request->all(),
             ]);
             return response()->json([
                 'error' => 'Terjadi kesalahan pada server',
-                'message' => 'Internal Server Error', // Generic message for users
+                'message' => 'Internal Server Error', 
             ], 500);
         }
     }

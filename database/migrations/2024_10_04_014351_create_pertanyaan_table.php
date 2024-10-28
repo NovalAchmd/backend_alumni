@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pertanyaan', function (Blueprint $table) {
             $table->unsignedBigInteger('id_pertanyaan')->autoIncrement();
             $table->text('pertanyaan');
-            $table->enum('jenis', ['tertutup', 'skala']);
+            $table->enum('jenis', ['terbuka', 'skala']);
             $table->timestamps();
         });
     }

@@ -13,15 +13,18 @@ class Pertanyaan extends Model
 
     protected $primaryKey = 'id_pertanyaan';
 
-    protected $fillable = ['pertanyaan', 'jenis'];
+    public $incrementing = true;
 
-    public function Pertanyaan()
-    {
-        return $this->belongsTo(Pertanyaan::class);
-    }
+    protected $fillable = [
+        'pertanyaan',
+        'jenis',
+    ];
 
-    public function alumni()
+    /**
+     * Define the relationship with the DataJawaban model.
+     */
+    public function jawaban()
     {
-        return $this->belongsTo(Alumni::class, 'id_alumni', 'id_alumni');
+        return $this->belongsTo(Data_jawaban::class, 'id_pertanyaan');
     }
 }

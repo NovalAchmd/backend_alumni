@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Pertanyaan;
+use App\Models\Data_jawaban;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class PertanyaanController extends Controller
 {
@@ -16,26 +19,25 @@ class PertanyaanController extends Controller
     }
 
     public function createPertanyaan(Request $request)
-{
-    $validator = validator::make($request->all(), [
-        'pertanyaan' => 'required|string',
-        'jenis' => 'required|in:skala,tertutup',
-    ]);
+    {
+        $request->validate([
+            'pertanyaan' => 'required|string',
+            'jenis' => 'required|in:terbuka,skala',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
+        $pertanyaan = Pertanyaan::create([
+            'pertanyaan' => $request->pertanyaan,
+            'jenis' => $request->jenis,
+        ]);
+
+        return response()->json(['message' => 'Pertanyaan berhasil dibuat', 'data' => $pertanyaan], 201);
     }
-
-    $pertanyaan = Pertanyaan::create($request->all());
-    return response()->json(['data' => $pertanyaan, 'message' => 'pertanyaan created successfully'], 201);
-}
 
 
 public function MelihatPertanyaan($id)
 {
-    // Find pertanyaan by the correct column name, e.g., id_pertanyaan
     $pertanyaan = Pertanyaan::
-                            where('id_pertanyaan', $id) // change this if the column is named differently
+                            where('id_pertanyaan', $id) 
                             ->first();
 
     if (!$pertanyaan) {
@@ -50,6 +52,7 @@ public function MelihatPertanyaan($id)
     {
         $validator = Validator::make($request->all(), [
             'pertanyaan' => 'required|string',
+            'jenis' => 'required|in:terbuka,skala',
         ]);
 
         if ($validator->fails()) {
@@ -78,5 +81,39 @@ public function MelihatPertanyaan($id)
         $pertanyaan->delete();
 
         return response()->json(['message' => 'Pertanyaan deleted successfully'], 200);
+    }
+
+    public function jawabPertanyaan(Request $request, $idPertanyaan)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+    
+        $alumni = $user->alumni;
+    
+        if (!$alumni) {
+            return response()->json(['message' => 'Alumni data not found for this user'], 404);
+        }
+    
+        // Validasi input
+        $request->validate([
+            'jawaban_terbuka' => 'nullable|string',
+            'jawaban_skala' => 'nullable|integer|between:1,5', // contoh skala
+        ]);
+    
+        // Simpan jawaban
+        $jawaban = new Data_jawaban();
+        $jawaban->id_alumni = $alumni->id_alumni;
+        $jawaban->id_pertanyaan = $idPertanyaan;
+        $jawaban->jawaban_terbuka = $request->jawaban_terbuka ?? ''; // Set to an empty string if null
+        $jawaban->jawaban_skala = $request->jawaban_skala;
+        $jawaban->save();
+
+    
+        return response()->json([
+            'message' => 'Jawaban berhasil disimpan',
+            'data' => $jawaban
+        ], 200);
     }
 }

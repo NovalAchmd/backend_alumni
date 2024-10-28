@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AlumniController;
 use App\Http\Controllers\API\BeritaController;
+use App\Http\Controllers\API\DataJawabanController;
 use App\Http\Controllers\API\LamaranController;
 use App\Http\Controllers\API\LoginController;
 use App\Http\Controllers\API\LogoutController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\API\LowonganController;
 use App\Http\Controllers\API\PertanyaanController;
 use App\Http\Controllers\API\RegisterController;
 use App\Http\Controllers\API\TracerStudyController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -84,3 +86,10 @@ Route::post('/create-berita', [BeritaController::class, 'CreateBerita']);
 Route::post('/update-berita/{id_berita}', [BeritaController::class, 'UpdateBerita']);
 Route::delete('/delete-berita/{id_berita}', [BeritaController::class, 'DeleteBerita']);
 Route::get('/melihat-berita/{id_berita}', [BeritaController::class, 'MelihatBerita']);
+
+//Data jawaban dan Pertanyaan
+Route::post('/data-jawaban', [DataJawabanController::class, 'melihatJawaban']);
+Route::middleware('auth:sanctum')->post('pertanyaan/jawab/{id_pertanyaan}', [PertanyaanController::class, 'jawabPertanyaan']);
+Route::post('/create-pertanyaan', [PertanyaanController::class, 'createPertanyaan']);
+Route::delete('/delete-pertanyaan', [PertanyaanController::class, 'DeletePertanyaan']);
+Route::post('/update-pertanyaan', [PertanyaanController::class, 'UpdatePertanyaan']);

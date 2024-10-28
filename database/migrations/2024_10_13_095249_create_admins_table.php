@@ -15,7 +15,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_admin')->autoIncrement();
             $table->foreignId('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->string('nama');
-            $table->string('noomor_induk')->unique();
+            $table->string('nomor_induk')->unique();
             $table->string('no_hp');
             $table->timestamps();
         });
