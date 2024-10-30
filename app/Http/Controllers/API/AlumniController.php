@@ -110,7 +110,6 @@ class AlumniController extends Controller
     }
 
     try {
-        // Validate input data
         $validator = Validator::make($request->all(), [
             'nama_alumni' => 'nullable|string|max:255',
             'angkatan' => 'nullable|string',
@@ -125,7 +124,6 @@ class AlumniController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Prepare data for update
         $dataToUpdate = [
             'nama_alumni' => $request->nama_alumni ?? $alumni->nama_alumni,
             'angkatan' => $request->angkatan ?? $alumni->angkatan,
@@ -136,20 +134,15 @@ class AlumniController extends Controller
             
         ];
 
-        // Handle photo upload if provided
         if ($request->hasFile('foto')) {
-            // Delete the old photo if it exists
             if ($alumni->foto) {
                 Storage::disk('public')->delete($alumni->foto);
             }
-            // Save the new photo and update its path
             $dataToUpdate['foto'] = $request->file('foto')->store('alumni_photos', 'public');
         } else {
-            // If no new photo is provided, retain the old photo
             $dataToUpdate['foto'] = $alumni->foto;
         }
 
-        // Update the alumni data
         $alumni->update($dataToUpdate);
 
         return response()->json([
@@ -179,7 +172,6 @@ class AlumniController extends Controller
         return response()->json(['message' => 'Alumni tidak ditemukan'], 404);
     }
 
-    // Tentukan data apa saja yang boleh dihapus berdasarkan input dari request
     $dataToUpdate = [];
 
     if ($request->has('hapus_foto')) {

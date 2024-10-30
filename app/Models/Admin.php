@@ -14,4 +14,13 @@ class Admin extends Model
     protected $table = 'admins';
 
     protected $primaryKey = 'id_admin';
+
+    protected $fillable = [
+        'id_user', 'nama', 'nomor_induk',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(Alumni::class, 'id_user','id');
+    }
 }

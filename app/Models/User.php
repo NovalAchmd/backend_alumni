@@ -26,6 +26,16 @@ class User extends Authenticatable
     return $this->hasOne(Alumni::class, 'id_user', 'id'); // Match the foreign key in alumni and local key in users
 }
 
+public function admin()
+{
+    return $this->hasOne(Admin::class, 'id_user', 'id'); // Match the foreign key in alumni and local key in users
+}
+
+
+public function Perusahaan()
+{
+    return $this->hasOne(Perusahaan::class, 'id_user', 'id'); // Match the foreign key in alumni and local key in users
+}
 
 
 
